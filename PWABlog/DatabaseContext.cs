@@ -6,10 +6,12 @@ using Microsoft.EntityFrameworkCore;
 using PWABlog.Models.Blog.Postagem.Revisao;
 using PWABlog.Models.Blog.Postagem.Classificacao;
 using PWABlog.Models.Blog.Postagem.Comentario;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using PWABlog.Models.ControleDeAcesso;
 
 namespace PWABlog
 {
-    public class DatabaseContext : DbContext
+    public class DatabaseContext : IdentityDbContext<Usuario, Papel, int>
     {
         public DbSet<CategoriaEntity> Categorias { get; set; }
         
@@ -30,7 +32,7 @@ namespace PWABlog
         {
             base.OnConfiguring(optionsBuilder);
 
-            optionsBuilder.UseMySql("Server=localhost; User=root; password=root; Database=pwaBlog");
+            optionsBuilder.UseMySql("Server=localhost; User=root; password=admin; Database=pwaBlog");
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

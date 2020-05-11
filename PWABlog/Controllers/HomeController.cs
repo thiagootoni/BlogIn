@@ -77,12 +77,37 @@ namespace PWABlog.Controllers
                     model.Etiquetas.Add(etiquetaHomeIndex);
                 }
             }
-            
-            
+
+
             // Alimentar a lista de postagens populares que serão exibidas na view
-            // TODO Obter lista de postagens populares
+            List<PostagemEntity> postagensPopulares = _postagemOrmService.ObterPostagensPopulares();
+            List<PostagemEntity> topFourPostagensPopulares = new List<PostagemEntity>();
+
+            int qtdPostagens = 0;
+            foreach (PostagemEntity postagem in postagensPopulares)
+            {
+                if (qtdPostagens < 4)
+                {
+                    topFourPostagensPopulares.Add(postagem);
+                }
+                else
+                {
+                    break;
+                }
+                
+                qtdPostagens++;
+            }
             
-            
+            foreach (PostagemEntity postagem in topFourPostagensPopulares)
+            {
+                PostagemPopularHomeIndex pop = new PostagemPopularHomeIndex();
+                pop.Categoria = postagem.Categoria.Nome;
+                pop.PostagemId = postagem.Id.ToString();
+                pop.Titulo = postagem.Titulo;
+
+                model.PostagensPopulares.Add(pop);
+            }
+
             return View(model);
         }
 
