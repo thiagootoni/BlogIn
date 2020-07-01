@@ -2,9 +2,7 @@
 using PWABlog.Models.Blog.Categoria;
 using PWABlog.RequestModels.AdminCategorias;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using PWABlog.ViewModels.Admin;
 
 namespace PWABlog.Controllers.Admin
 {
@@ -22,7 +20,23 @@ namespace PWABlog.Controllers.Admin
         [HttpGet]
         public IActionResult Listar()
         {
-            return View();
+            AdminCategoriasListarViewModel model = new AdminCategoriasListarViewModel();
+
+            // Obter as Categorias
+            var listaCategorias = _categoriaOrmService.ObterCategorias();
+
+            // Alimentar o model com as etiquetas que serão listadas
+            foreach (var categoriaEntity in listaCategorias)
+            {
+                var categoriaAdminCategorias = new CategoriaAdminCategorias();
+                categoriaAdminCategorias.Id = categoriaEntity.Id;
+                categoriaAdminCategorias.Nome = categoriaEntity.Nome;
+
+                model.Categorias.Add(categoriaAdminCategorias);
+            }
+
+
+            return View(model);
         }
 
         [HttpGet]
@@ -34,9 +48,11 @@ namespace PWABlog.Controllers.Admin
         [HttpGet]
         public IActionResult Criar()
         {
-            ViewBag.erro = TempData["erro-msg"];
+            AdminCategoriasCriarViewModel model = new AdminCategoriasCriarViewModel();
 
-            return View();
+            model.Erro = (string)TempData["erro-msg"];
+
+            return View(model);
         }
 
         [HttpPost]
@@ -60,10 +76,25 @@ namespace PWABlog.Controllers.Admin
         [HttpGet]
         public IActionResult Editar(int id)
         {
-            ViewBag.id = id;
-            ViewBag.erro = TempData["erro-msg"];
+            AdminCategoriasEditarViewModel model = new AdminCategoriasEditarViewModel();
 
-            return View();
+            // Obter categoria a editar
+            var categoriaAEditar = _categoriaOrmService.ObterCategoriaPorId(id);
+            if (categoriaAEditar == null)
+            {
+                return RedirectToAction("Listar");
+            }
+
+            // Definir possível erro de processamento (vindo do post do criar)
+            model.Erro = (string)TempData["erro-msg"];
+
+            // Alimentar o model com os dados da categoria a ser editada
+
+            model.IdCategoria = categoriaAEditar.Id;
+            model.NomeCategoria = categoriaAEditar.Nome;
+            model.TituloPagina += model.NomeCategoria;
+
+            return View(model);
         }
 
         [HttpPost]
@@ -88,10 +119,24 @@ namespace PWABlog.Controllers.Admin
         [HttpGet]
         public IActionResult Remover(int id)
         {
-            ViewBag.id = id;
-            ViewBag.erro = TempData["erro-msg"];
+            AdminCategoriasRemoverViewModel model = new AdminCategoriasRemoverViewModel();
 
-            return View();
+            // Obter etiqueta a remover
+            var ARemover = _categoriaOrmService.ObterCategoriaPorId(id);
+            if (ARemover == null)
+            {
+                return RedirectToAction("Listar");
+            }
+
+            // Definir possível erro de processamento (vindo do post do criar)
+            model.Erro = (string)TempData["erro-msg"];
+
+            // Alimentar o model com os dados da etiqueta a ser editada
+            model.IdCategoria = ARemover.Id;
+            model.NomeCategoria = ARemover.Nome;
+            model.TituloPagina += model.NomeCategoria;
+
+            return View(model);
         }
 
         [HttpPost]

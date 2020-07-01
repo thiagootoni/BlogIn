@@ -1,73 +1,74 @@
-﻿using System;
+﻿using PWABlog;
+using PWABlog.Models.Blog.Autor;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 
 namespace PWABlog.Models.Blog.Autor
 {
-    public class AutorOrmService
-    {
+	
+public class AutorOrmService
+		{
+			private readonly PWABlog.DatabaseContext _databaseContext;
 
-        private readonly DatabaseContext _databaseContext;
+			public AutorOrmService(DatabaseContext databaseContext)
+			{
+				_databaseContext = databaseContext;
+			}
 
-        public AutorOrmService(DatabaseContext databaseContext)
-        {
-            _databaseContext = databaseContext;
-        }
+			public List<AutorEntity> ObterAutores()
+			{
+				return _databaseContext.Autores.ToList();
+			}
 
-        public List<AutorEntity> ObterTodosAutores()
-        {
-            return _databaseContext.Autores.ToList();
-        }
+			public AutorEntity ObterAutorPorId(int idAutor)
+			{
+				var autor = _databaseContext.Autores.Find(idAutor);
 
-        public AutorEntity ObterAutorPorId(int idCategoria)
-        {
-            var autor = _databaseContext.Autores.Find(idCategoria);
+				return autor;
+			}
 
-            return autor;
-        }
+			public List<AutorEntity> PesquisarAutoresPorNome(string nomeAutor)
+			{
+				return _databaseContext.Autores.Where(c => c.Nome.Contains(nomeAutor)).ToList();
+			}
+			public AutorEntity CriarAutor(string nome)
+			{
+				var novoAutor = new AutorEntity { Nome = nome };
+				_databaseContext.Autores.Add(novoAutor);
+				_databaseContext.SaveChanges();
 
-        public List<AutorEntity> PesquisarAutoresPorNome(string nomeAutor)
-        {
-            return _databaseContext.Autores.Where(c => c.Nome.Contains(nomeAutor)).ToList();
-        }
+				return novoAutor;
+			}
 
-        public AutorEntity CriarAutor(String nome)
-        {
-            var NovoAutor = new AutorEntity { Nome = nome };
-            _databaseContext.Autores.Add(NovoAutor);
-            _databaseContext.SaveChanges();
+			public AutorEntity EditarAutor(int id, string nome)
+			{
+				var autor = _databaseContext.Autores.Find(id);
 
-            return NovoAutor;
-        }
+				if (autor == null)
+				{
+					throw new Exception("Autor não encontrada!");
+				}
 
-        public AutorEntity EditarAutor(int id, string nome)
-        {
-            var Autor = _databaseContext.Autores.Find(id);
+				autor.Nome = nome;
+				_databaseContext.SaveChanges();
 
-            if (Autor == null)
-            {
-                throw new Exception("Autor não encontrado!");
-            }
+				return autor;
+			}
 
-            Autor.Nome = nome;
-            _databaseContext.SaveChanges();
-            return Autor;
-        }
+			public bool RemoverAutor(int id)
+			{
+				var autor = _databaseContext.Autores.Find(id);
 
-        public Boolean RemoverAutor(int id)
-        {
-            var Autor = _databaseContext.Autores.Find(id);
+				if (autor == null)
+				{
+					throw new Exception("Autor não encontrada!");
+				}
 
-            if (Autor == null)
-            {
-                throw new Exception("Autor não encontrado!");
-            }
+				_databaseContext.Autores.Remove(autor);
+				_databaseContext.SaveChanges();
 
-            _databaseContext.Autores.Remove(Autor);
-            _databaseContext.SaveChanges();
-
-            return true;
-        }
-    }
-}
+				return true;
+			}
+		}
+	}

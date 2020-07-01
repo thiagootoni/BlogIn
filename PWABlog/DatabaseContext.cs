@@ -11,9 +11,10 @@ using PWABlog.Models.ControleDeAcesso;
 
 namespace PWABlog
 {
-    public class DatabaseContext : IdentityDbContext<Usuario, Papel, int>
-    {
-        public DbSet<CategoriaEntity> Categorias { get; set; }
+	public class DatabaseContext : IdentityDbContext<Usuario, Papel, int>
+	{
+		
+		public DbSet<CategoriaEntity> Categorias { get; set; }
         
         public DbSet<AutorEntity> Autores { get; set; }
         

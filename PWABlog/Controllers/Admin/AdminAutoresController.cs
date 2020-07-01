@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using PWABlog.Models.Blog.Autor;
 using PWABlog.RequestModels.AdminAutores;
+using PWABlog.ViewModels.Admin;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace PWABlog.Controllers.Admin
 {
-    public class AdminAutoresController : Controller
+	 public class AdminAutoresController : Controller
     {
         private readonly AutorOrmService _autoresOrmService;
 
@@ -20,26 +21,46 @@ namespace PWABlog.Controllers.Admin
         }
 
         [HttpGet]
+        //[Route("admin/autores")]
+        //[Route("admin/autores/listar")]
         public IActionResult Listar()
         {
-            return View();
+            AdminAutoresListarViewModel model = new AdminAutoresListarViewModel();
+
+            var listaAutores = _autoresOrmService.ObterAutores();
+
+            foreach (var autoresEntity in listaAutores)
+            {
+                var autorAdminAutores = new AutorAdminAutores();
+                autorAdminAutores.Id = autoresEntity.Id;
+                autorAdminAutores.Nome = autoresEntity.Nome;
+
+                model.autores.Add(autorAdminAutores);
+            }
+
+            return View(model);
         }
 
         [HttpGet]
-        public IActionResult Detalhar()
+        //[Route("admin/autores/{id}")]
+        public IActionResult Detalhar(int id)
         {
             return View();
         }
 
         [HttpGet]
+        //[Route("admin/autores/criar")]
         public IActionResult Criar()
         {
-            ViewBag.erro = TempData["erro-msg"];
+            AdminAutoresCriarViewModel model = new AdminAutoresCriarViewModel();
 
-            return View();
+            model.Erro = (string)TempData["erro-msg"];
+
+            return View(model);
         }
 
         [HttpPost]
+        //[Route("admin/autores/criar")]
         public RedirectToActionResult Criar(AdminAutoresCriarRequestModel request)
         {
             var nome = request.Nome;
@@ -58,15 +79,30 @@ namespace PWABlog.Controllers.Admin
         }
 
         [HttpGet]
+        //[Route("admin/autores/editar/{id}")]
         public IActionResult Editar(int id)
         {
-            ViewBag.id = id;
-            ViewBag.erro = TempData["erro-msg"];
+            AdminAutoresEditarViewModel model = new AdminAutoresEditarViewModel();
 
-            return View();
+            // Obter categoria a editar
+            var autorAEditar = _autoresOrmService.ObterAutorPorId(id);
+            if (autorAEditar == null)
+            {
+                return RedirectToAction("Listar");
+            }
+
+            // Definir possível erro de processamento (vindo do post do criar)
+            model.Erro = (string)TempData["erro-msg"];
+
+            model.IdAutor = autorAEditar.Id;
+            model.NomeAutor = autorAEditar.Nome;
+            model.TituloPagina += model.NomeAutor;
+
+            return View(model);
         }
 
         [HttpPost]
+        //[Route("admin/autores/editar/{id}")]
         public RedirectToActionResult Editar(AdminAutoresEditarRequestModel request)
         {
             var id = request.Id;
@@ -86,15 +122,31 @@ namespace PWABlog.Controllers.Admin
         }
 
         [HttpGet]
+        //[Route("admin/autores/remover/{id}")]
         public IActionResult Remover(int id)
         {
-            ViewBag.id = id;
-            ViewBag.erro = TempData["erro-msg"];
+            AdminAutoresRemoverViewModel model = new AdminAutoresRemoverViewModel();
 
-            return View();
+            // Obter etiqueta a remover
+            var ARemover = _autoresOrmService.ObterAutorPorId(id);
+            if (ARemover == null)
+            {
+                return RedirectToAction("Listar");
+            }
+
+            // Definir possível erro de processamento (vindo do post do criar)
+            model.Erro = (string)TempData["erro-msg"];
+
+            // Alimentar o model com os dados da etiqueta a ser editada
+            model.IdAutor = ARemover.Id;
+            model.NomeAutor = ARemover.Nome;
+            model.TituloPagina += model.NomeAutor;
+
+            return View(model);
         }
 
         [HttpPost]
+        //[Route("admin/autores/remover/{id}")]
         public RedirectToActionResult Remover(AdminAutoresRemoverRequestModel request)
         {
             var id = request.Id;
@@ -111,36 +163,5 @@ namespace PWABlog.Controllers.Admin
 
             return RedirectToAction("Listar");
         }
-
-
-
-        //[HttpGet]
-        //[Route("admin/autores")]
-        //[Route("admin/autores/listar")]
-        //public string Listar()
-        //{
-        //    return "listar autores";
-        //}
-
-        //[HttpPost]
-        //[Route("admin/autores/criar")]
-        //public string Criar()
-        //{
-        //    return "criar autor";
-        //}
-
-        //[HttpPost]
-        //[Route("admin/autores/editar/{id}")]
-        //public string Editar(int id)
-        //{
-        //    return "editar autor";
-        //}
-
-        //[HttpPost]
-        //[Route("admin/autores/remover/{id}")]
-        //public string Remover(int id)
-        //{
-        //    return "remover autor";
-        //}
     }
 }

@@ -6,8 +6,8 @@ using System.Threading.Tasks;
 
 namespace PWABlog.Models.ControleDeAcesso
 {
-    public class Usuario :IdentityUser<int>
-    {
-        public string Apelido { get; set; }
-    }
+	public class Usuario : IdentityUser<int>
+	{
+		public string Apelido { get; set; }
+	}
 }

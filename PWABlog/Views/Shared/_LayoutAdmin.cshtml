@@ -1,0 +1,87 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="icon" type="image/png" sizes="16x16" href="~/theme-admin/images/favicon.png">
+    <title>@Model.TituloPagina</title>
+    <!-- Bootstrap Core CSS -->
+    <link href="~/theme-admin/bower_components/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Menu CSS -->
+    <link href="~/theme-admin/bower_components/metisMenu/dist/metisMenu.min.css" rel="stylesheet">
+    <!-- Menu CSS -->
+    <link href="~/theme-admin/bower_components/morrisjs/morris.css" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link href="~/theme-admin/css/style.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+</head>
+
+<body>
+        <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+            <div class="navbar-nav col-md-11">
+                <a class="navbar-brand" href="#">Blogin</a>
+                <div>
+                    <ul class="navbar-nav mr-auto">
+                        
+                        <li class="nav-item">
+                            <a href="/admin" class="nav-link"><i class="glyphicon glyphicon-fire fa-fw"></i> Home</a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="/admin/autores" class="nav-link"><i class="ti-user fa-fw"></i>Autores</a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="/admin/categorias" class="nav-link"><i class="ti-layout fa-fw"></i>Categorias</a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="/admin/etiquetas" class="nav-link"><i class="ti-face-smile fa-fw"></i> Etiquetas</a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="/admin/postagens" class="nav-link"><i class="ti-location-pin fa-fw"></i>Postagens</a>
+                        </li>
+
+                    </ul>
+                </div>
+            </div>
+            <div class="navbar-nav col-md-1">
+                <a class="navbar-brand" href="/acesso/logout" >Logout</a>
+            </div>
+   	    </nav>
+        <!-- Page Content -->
+        <div id="page-wrapper">
+            @RenderBody()
+		 </div>
+         <!-- /.row -->
+        <!-- /#page-wrapper -->
+        <footer class="footer text-center"> 2017 &copy; Myadmin brought to you by wrappixel.com </footer>
+    </div>
+    <!-- /#wrapper -->
+    <!-- jQuery -->
+    <script src="~/theme-admin/bower_components/jquery/dist/jquery.min.js"></script>
+    <!-- Bootstrap Core JavaScript -->
+    <script src="~/theme-admin/bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
+    <!-- Menu Plugin JavaScript -->
+    <script src="~/theme-admin/bower_components/metisMenu/dist/metisMenu.min.js"></script>
+    <!--Nice scroll JavaScript -->
+    <script src="~/theme-admin/js/jquery.nicescroll.js"></script>
+    <!--Morris JavaScript -->
+    <script src="~/theme-admin/bower_components/raphael/raphael-min.js"></script>
+    <script src="~/theme-admin/bower_components/morrisjs/morris.js"></script>
+    <!--Wave Effects -->
+    <script src="~/theme-admin/js/waves.js"></script>
+    <!-- Custom Theme JavaScript -->
+    <script src="~/theme-admin/js/myadmin.js"></script>
+    <script src="~/theme-admin/js/dashboard1.js"></script>
+</body>
+
+</html>

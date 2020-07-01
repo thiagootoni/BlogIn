@@ -6,7 +6,8 @@ using System.Threading.Tasks;
 
 namespace PWABlog.Models.ControleDeAcesso
 {
-    public class Papel : IdentityRole<int>
-    {
-    }
+	public class Papel : IdentityRole<int>
+	{
+
+	}
 }

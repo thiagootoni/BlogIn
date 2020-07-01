@@ -1,11 +1,10 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace PWABlog.ViewModels.Home
 {
-    public class HomeIndexViewModel
+    public class HomeIndexViewModel : ViewModelAreaComum
     {
-        public string TituloPagina { get; set; }
-
         public ICollection<PostagemHomeIndex> Postagens { get; set; }
         
         public ICollection<CategoriaHomeIndex> Categorias { get; set; }
@@ -17,6 +16,7 @@ namespace PWABlog.ViewModels.Home
         
         public HomeIndexViewModel()
         {
+            TituloPagina = "Blog";
             Postagens = new List<PostagemHomeIndex>();
             Categorias = new List<CategoriaHomeIndex>();
             Etiquetas = new List<EtiquetaHomeIndex>();

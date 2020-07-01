@@ -2,60 +2,87 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
 
 namespace PWABlog.Models.Blog.Postagem.Revisao
 {
-    public class RevisaoOrmService
-    {
-        private readonly DatabaseContext _databaseContext;
+	public class RevisaoOrmService
+	{
+		private readonly DatabaseContext _databaseContext;
 
         public RevisaoOrmService(DatabaseContext databaseContext)
         {
             _databaseContext = databaseContext;
         }
 
-        public List<RevisaoEntity> ObterTodasRevisoes()
+        public RevisaoEntity ObterRevisaoPorId(int id)
         {
-            return _databaseContext.Revisoes.Include(r => r.Postagem).ToList();
+            // Obter a revisão 
+            var revisao = _databaseContext.Revisoes.Find(id);
+
+            return revisao;
         }
 
-        public RevisaoEntity CriarRevisao(PostagemEntity postagem, string texto)
+        public RevisaoEntity CriarRevisao(int IdPostagem, string texto)
         {
-            RevisaoEntity NovaRevisao = new RevisaoEntity { Postagem = postagem, Texto = texto, Versao = 1, DataCriacao = DateTime.Today };
-            _databaseContext.Revisoes.Add(NovaRevisao);
-            _databaseContext.SaveChanges();
-            return NovaRevisao;
-        }
+            // Verifica a Existencia de Postagem da Revisão
+            var postagem = _databaseContext.Postagens.Find(IdPostagem);
 
-        public RevisaoEntity EditarRevisao(int id, string texto, DateTime dataCriacao)
-        {
-            var Revisao = _databaseContext.Revisoes.Find(id);
-
-            if (Revisao == null)
+            if (postagem == null)
             {
-                throw new Exception("Revisão não encontrada!");
+                throw new Exception("A Postagem informada para a Revisão não existe!");
             }
 
-            Revisao.Texto = texto;
-            Revisao.Versao++;
-            Revisao.DataCriacao = DateTime.Today;
+            // Criar nova Revisão
+            var novaRevisao = new RevisaoEntity
+            {
+                Postagem = postagem,
+                Texto = texto,
+                Versao = postagem.ObterUltimaRevisao().Versao + 1,
+                DataCriacao = new DateTime()
+            };
 
-            return Revisao;
+            _databaseContext.Revisoes.Add(novaRevisao);
+            _databaseContext.SaveChanges();
+
+            return novaRevisao;
         }
 
-        public bool ExcluirRevisao(int id)
+        public RevisaoEntity EditarRevisão(int id, string texto)
         {
-            var Revisao = _databaseContext.Revisoes.Find(id);
+            // obter a revisão para edição
+            var revisao = _databaseContext.Revisoes.Find(id);
 
-            if (Revisao == null)
+            if (revisao == null)
             {
-                throw new Exception("Revisão não encontrada!");
+                throw new Exception("Revisão não encontrada");
             }
 
-            _databaseContext.Revisoes.Remove(Revisao);
+            // Atualiza os dados da revisão
+            revisao.Id = id;
+            revisao.Texto = texto;
+
             _databaseContext.SaveChanges();
+
+            return revisao;
+        }
+
+        public bool RemoverRevisao(int id)
+        {
+            // Obter revisão a ser removida
+            var revisao = _databaseContext.Revisoes.Find(id);
+
+            if (revisao == null)
+            {
+                throw new Exception("Revisão não encontrada");
+            }
+
+            // Remover a Revisão
+            _databaseContext.Revisoes.Remove(revisao);
+            _databaseContext.SaveChanges();
+
             return true;
+
         }
     }
 }
+

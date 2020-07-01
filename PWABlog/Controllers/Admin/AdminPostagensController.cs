@@ -1,42 +1,65 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using PWABlog.Models.Blog.Autor;
 using PWABlog.Models.Blog.Categoria;
-using PWABlog.Models.Blog.Etiqueta;
 using PWABlog.Models.Blog.Postagem;
 using PWABlog.Models.Blog.Postagem.Revisao;
+using PWABlog.RequestModels.AdminAutores;
 using PWABlog.RequestModels.AdminPostagens;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using PWABlog.ViewModels.Admin;
 
 namespace PWABlog.Controllers.Admin
 {
+
+  [Authorize]
     public class AdminPostagensController : Controller
     {
         private readonly PostagemOrmService _postagemOrmService;
-        private readonly RevisaoOrmService _revisaoOrmService;
-        private readonly AutorOrmService _autorOrmService;
         private readonly CategoriaOrmService _categoriaOrmService;
-        private readonly EtiquetaOrmService _etiquetaOrmService;
+        private readonly AutorOrmService _autoresOrmService;
+        private readonly RevisaoOrmService _revisaoOrmService;
 
-        public AdminPostagensController(PostagemOrmService postagemOrmService, RevisaoOrmService revisaoOrmService, 
-            AutorOrmService autorOrmService, CategoriaOrmService categoriaOrmService, EtiquetaOrmService etiquetaOrmService)
+        public AdminPostagensController(
+            PostagemOrmService postagemOrmService,
+            CategoriaOrmService categoriaOrmService,
+            AutorOrmService autoresOrmService,
+            RevisaoOrmService revisaoOrmService
+        )
         {
             _postagemOrmService = postagemOrmService;
-            _revisaoOrmService = revisaoOrmService;
-            _autorOrmService = autorOrmService;
             _categoriaOrmService = categoriaOrmService;
-            _etiquetaOrmService = etiquetaOrmService;
+            _autoresOrmService = autoresOrmService;
+            _revisaoOrmService = revisaoOrmService;
         }
+
         [HttpGet]
         public IActionResult Listar()
         {
-            return View();
+            AdminPostagensListarViewModel model = new AdminPostagensListarViewModel();
+
+            var listaPostagens = _postagemOrmService.ObterPostagens();
+
+            foreach (var postagemEntity in listaPostagens)
+            {
+                //var categoria = _categoriaOrmService.ObterCategoriaPorId(postagemEntity.Categoria.Id);
+                //var autor = _autoresOrmService.ObterAutorPorId(postagemEntity.Autor.Id);
+
+                var postagemAdminPostagens = new PostagemAdminPostagens();
+                postagemAdminPostagens.Id = postagemEntity.Id;
+                postagemAdminPostagens.Titulo = postagemEntity.Titulo;
+                postagemAdminPostagens.NomeAutor = postagemEntity.Autor.Nome;
+                postagemAdminPostagens.Categoria = postagemEntity.Categoria.Nome;
+                postagemAdminPostagens.DataExibição = postagemEntity.DataExibicao;
+
+                model.Postagens.Add(postagemAdminPostagens);
+            }
+
+            return View(model);
         }
 
         [HttpGet]
-        public IActionResult Detalhar()
+        public IActionResult Detalhar(int id)
         {
             return View();
         }
@@ -44,24 +67,55 @@ namespace PWABlog.Controllers.Admin
         [HttpGet]
         public IActionResult Criar()
         {
-            ViewBag.erro = TempData["erro-msg"];
+            AdminPostagensCriarViewModel model = new AdminPostagensCriarViewModel();
 
-            return View();
+            // Definir possível erro de processamento (vindo do post do criar)
+            model.Erro = (string)TempData["erro-msg"];
+
+            // Obter as Categorias
+            var listaCategorias = _categoriaOrmService.ObterCategorias();
+
+            // Alimentar o model com as categorias que serão colocadas no <select> do formulário
+            foreach (var categoriaEntity in listaCategorias)
+            {
+                var categoriaAdminPostagens = new CategoriaAdminPostagens();
+                categoriaAdminPostagens.IdCategoria = categoriaEntity.Id;
+                categoriaAdminPostagens.NomeCategoria = categoriaEntity.Nome;
+
+                model.CategoriasPostagem.Add(categoriaAdminPostagens);
+            }
+
+            // Obter os Autores
+            var listaAutores = _autoresOrmService.ObterAutores();
+
+            // Alimentar o model com as Autores que serão colocadas no <select> do formulário
+            foreach (var autorEntity in listaAutores)
+            {
+                var autorAdminPostagens = new AutorAdminPostagens();
+                autorAdminPostagens.IdAutor = autorEntity.Id;
+                autorAdminPostagens.NomeAutor = autorEntity.Nome;
+
+                model.AutoresPostagem.Add(autorAdminPostagens);
+            }
+
+            return View(model);
+
         }
 
         [HttpPost]
-        public RedirectToActionResult Criar(AdminPostagensCriarRequestModel request)
+        public RedirectToActionResult Criar(AdminPostagemCriarRequestModel request)
         {
-            var Titulo = request.Titulo;
-            var Descricao = request.Descricao;
-            var Autor = _autorOrmService.ObterAutorPorId(Convert.ToInt32(request.IdAutor));
-            var Categoria = _categoriaOrmService.ObterCategoriaPorId(Convert.ToInt32(request.IdCategoria));
-            var Texto = request.Texto;
+            var titulo = request.Titulo;
+            var descricao = request.Descricao;
+            var idAutor = request.IdAutor;
+            var idCategoria = request.IdCategoria;
+            var texto = request.Texto;
+            var dataExibicao = DateTime.Parse(request.DataExibicao);
+             
 
             try
             {
-                var Postagem = _postagemOrmService.CriarPostagem(Titulo, Descricao, Autor, Categoria);
-                _revisaoOrmService.CriarRevisao(Postagem, Texto);
+                _postagemOrmService.CriarPostagem(titulo, descricao, idAutor, idCategoria, texto, dataExibicao);
             }
             catch (Exception exception)
             {
@@ -75,25 +129,41 @@ namespace PWABlog.Controllers.Admin
         [HttpGet]
         public IActionResult Editar(int id)
         {
-            ViewBag.id = id;
-            ViewBag.erro = TempData["erro-msg"];
+            AdminPostagensEditarViewModel model = new AdminPostagensEditarViewModel();
 
-            return View();
+            // Obter categoria a editar
+            var postagenAEditar = _postagemOrmService.ObterPostagemPorId(id);
+            if (postagenAEditar == null)
+            {
+                return RedirectToAction("Listar");
+            }
+
+            // Definir possível erro de processamento (vindo do post do criar)
+            model.Erro = (string)TempData["erro-msg"];
+
+            model.Id = postagenAEditar.Id;
+            model.IdCategoria = postagenAEditar.Categoria.Id;
+            model.Titulo = postagenAEditar.Titulo;
+            model.Descricao = postagenAEditar.Descricao;
+            model.Texto = postagenAEditar.Revisoes.ToString();
+            //model.TituloPagina += model.Titulo;
+
+            return View(model);
         }
 
         [HttpPost]
-        public RedirectToActionResult Editar(AdminPostagensEditarRequestModel request)
+        public RedirectToActionResult Editar(AdminPostagemEditarRequestModel request)
         {
             var id = request.Id;
-            var Titulo = request.Titulo;
-            var Descricao = request.Descricao;
-            var Autor = _autorOrmService.ObterAutorPorId(Convert.ToInt32(request.IdAutor));
-            var Categoria = _categoriaOrmService.ObterCategoriaPorId(Convert.ToInt32(request.IdCategoria));
-            var Texto = request.Texto;
+            var titulo = request.Texto;
+            var descricao = request.Descricao;
+            var idCategoria = Convert.ToInt32(request.IdCategoria);
+            var texto = request.Texto;
+            var dataExibicao = DateTime.Parse(request.DataExibicao);
 
             try
             {
-                _postagemOrmService.EditarPostagem(id, Titulo, Descricao, Autor, Categoria);
+                _postagemOrmService.EditarPostagem(id, titulo, descricao, idCategoria, texto, dataExibicao);
             }
             catch (Exception exception)
             {
@@ -114,13 +184,13 @@ namespace PWABlog.Controllers.Admin
         }
 
         [HttpPost]
-        public RedirectToActionResult Remover(AdminPostagensRemoverRequestModel request)
+        public RedirectToActionResult Remover(AdminPostagemRemoverRequestModel request)
         {
             var id = request.Id;
 
             try
             {
-                _postagemOrmService.ExcluirPostagem(id);
+                _postagemOrmService.RemoverPostagem(id);
             }
             catch (Exception exception)
             {
@@ -130,6 +200,5 @@ namespace PWABlog.Controllers.Admin
 
             return RedirectToAction("Listar");
         }
-
     }
 }
